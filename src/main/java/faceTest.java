@@ -8,8 +8,8 @@ import java.io.IOException;
  * @create 2019-03-02 21:08
  **/
 public class faceTest {
-    private static final String faceUrl ="/Users/cygnusmoci/Pictures/faceTest.jpg";
-    private static final String faceOutUrl ="/Users/cygnusmoci/Pictures/faceTestOut.jpg";
+    private static final String faceUrl ="s:/灰度图.jpg";
+    private static final String faceOutUrl ="s:/faceTestOut.jpg";
 
     public static void main(String[] args) throws IOException {
         BufferedImage BI = ImageIO.read(new File(faceUrl));
@@ -25,9 +25,23 @@ public class faceTest {
                 int g = (rgb&0xff) >> 8;
                 int b = rgb&0xff ;
 
-                int avg = (int)(r*0.29+g*0.60+b*0.11)*10;
+                int xr = 12;
+                int xg = 59;
+                int xb = 131;
+                int rgvXAvg = (xr+xg+xb)/3;
+                int avg = (r*xr+g*xg+b*xb)/rgvXAvg;
+
+//                int avg = (int) (r*1.89+g*0.54+b*1.80);
+
+
+                // 防溢出
+                if(avg >255) avg = 255;
+                else if(avg < 0) avg = 0;
+
+//                 LBP
                 img[i][j] = avg;
-                avg = lbpOprt(img,i,j);
+                avg = lbpTest.lbpOprt(img,i,j);
+
                 int p = (a << 24) | (avg << 16) | (avg << 8) | avg;
                 BI.setRGB(j,i,p);
                 lbp[i][j] = avg;
@@ -36,19 +50,16 @@ public class faceTest {
 
         File file = new File(faceOutUrl);
         ImageIO.write(BI,"jpg",file);
-        printArray(lbp);
+//        printArray(lbp);
 //        printHstgm(img);
     }
 
     public static void printArray(int[][] arr){
-        for (int i = 0; i < arr.length; i+=5) {
-            for (int j = 0; j < arr[0].length; j+=5) {
-//                if(arr[i][j] == 0)
-                    System.out.println(arr[i][j]+ " ");
-//                else
-//                    System.out.print(1+ " ");
+        for (int i = 0; i < arr.length; i++) {
+            for (int j = 0; j < arr[0].length; j++) {
+                    System.out.print(arr[i][j]+ "    ");
             }
-//            System.out.println();
+            System.out.println();
         }
     }
 
@@ -60,7 +71,7 @@ public class faceTest {
         for (int i = 0; i < arr.length; i++) {
             for (int j = 0; j < arr[0].length; j++) {
                 int a = (BI.getRGB(j,i) & 0xff )>>24;
-                int avg = lbpOprt(arr,i,j);
+                int avg = lbpTest.lbpOprt(arr,i,j);
                 img[j][i]  = (a << 24) | (avg << 16) | (avg << 8) | avg;
             }
         }
@@ -70,27 +81,6 @@ public class faceTest {
                 BI.setRGB(j,i,img[j][i]);
             }
         }
-    }
-
-    public static int lbpOprt(int[][] arr,int xi,int yi){
-        if(xi == 0 || yi == 0 || xi == arr.length-1 || yi == arr[0].length-1 ) return arr[xi][yi];
-        StringBuilder lbpSB = new StringBuilder();
-        int base = arr[xi][yi];
-        lbpSB.append(bp(base,arr[xi-1][yi-1]));
-        lbpSB.append(bp(base,arr[xi-1][yi]));
-        lbpSB.append(bp(base,arr[xi-1][yi+1]));
-        lbpSB.append(bp(base,arr[xi][yi+1]));
-        lbpSB.append(bp(base,arr[xi+1][yi+1]));
-        lbpSB.append(bp(base,arr[xi+1][yi]));
-        lbpSB.append(bp(base,arr[xi+1][yi-1]));
-        lbpSB.append(bp(base,arr[xi][yi-1]));
-        return Integer.parseInt(lbpSB.toString(),2);
-
-
-    }
-    public static char bp(int a,int b){
-        if(a>b) return '1';
-        else return '0';
     }
 
     public static void printHstgm(int[][] arr){

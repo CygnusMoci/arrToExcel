@@ -9,5 +9,8 @@
         <module name="arrToExcel" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="arrToExcel" target="1.5" />
+    </bytecodeTargetLevel>
   </component>
 </project>
